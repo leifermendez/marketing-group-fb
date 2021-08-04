@@ -43,10 +43,11 @@ const checkLog = async ({ idGroup, message }) => { //138906596809905
     }
 }
 
-const saveLog = async ({ idGroup, message }) => {
+const saveLog = async ({ idGroup, message, account }) => {
     const data = {
         idGroup,
         message,
+        account,
         lastInteractionAt: Date.now()
     }
     await groupLogModel.create(data)

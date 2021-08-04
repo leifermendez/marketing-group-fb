@@ -232,7 +232,13 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
             el.click();
         }, btnPost);
 
-        await saveLog({ idGroup: group.idGroup, message: message.messagesGlobal })
+        await saveLog(
+            {
+                idGroup: group.idGroup,
+                message: message.messagesGlobal,
+                account: userFb.email
+            }
+        )
         await page.waitForTimeout(6000)
 
         await page.close();

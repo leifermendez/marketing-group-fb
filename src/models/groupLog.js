@@ -8,6 +8,9 @@ const GroupLogSchma = new mongoose.Schema(
         message: {
             type: String
         },
+        account: {
+            type: String
+        },
         lastInteractionAt: {
             type: Date
         }
