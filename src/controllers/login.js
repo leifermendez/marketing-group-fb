@@ -1,6 +1,7 @@
 const pathCookieAccount = `${__dirname}/../../tmp`
 const { url, layout } = require('../../config/config')
 const { consoleMessage } = require('../helpers/console')
+const { errorCatch } = require('../helpers/errorHandle')
 const { sendNoty } = require('../helpers/notification')
 const { getAccount } = require('./accounts')
 const { getGroup, saveLog, checkLog } = require('./groups')
@@ -50,22 +51,22 @@ const login = async ({ page }) => {
         }
 
     } catch (e) {
-        new Error('ERROR_UNDEFINED')
+        errorCatch(e, 'POST_GROUP_LOGIN')
     }
 
 
     try {
         consoleMessage('Starting new login', 'yellow')
         await page.goto(url);
-        await page.waitForXPath('//a[@data-cookiebanner="accept_button"]');
-        const acceptCookiesButton = (await page.$x('//a[@data-cookiebanner="accept_button"]'))[0];
+        await page.waitForXPath('//*[@data-cookiebanner="accept_button"]');
+        const acceptCookiesButton = (await page.$x('//*[@data-cookiebanner="accept_button"]'))[0];
         await page.evaluate((el) => {
             el.focus();
             el.click();
         }, acceptCookiesButton);
 
     } catch (e) {
-        new Error('ERROR_WAIT_BANNER_COOKIE')
+        errorCatch(e, 'POST_GROUP_ERROR_WAIT_BANNER_COOKIE')
         console.log('Error esperando banner cookie');
     }
 
@@ -171,6 +172,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         } catch (e) {
             await page.close();
             sendNoty({ title: 'Error', message: `${userFb.email} Falta unirse al grupo ${group.idGroup}`, type: 'error' })
+            errorCatch(e, 'POST_GROUP_NOT_JOINED')
             consoleMessage(`Not joined`, 'red')
         }
 
@@ -290,14 +292,14 @@ const join = async ({ page, data }, step = 0) => {
             }, btnBlockedOkey);
         }
     } catch (e) {
-        console.log('Seguimos', e)
+        console.log('Seguimos')
     }
 
     try {
         //TODO: Nos unimos
 
         const layoutJoin = (userFb.language === 'en') ?
-            `//button[@label="Join Group"]` : `//button[@label="Unirte al grupo"]`
+            `//button[@label="Join Group"]` : `//button[@label="Unirse al grupo"]`
         await page.waitForXPath(layoutJoin)
         await page.waitForTimeout(1000)
         const childJoinBtn = (await page.$x(layoutJoin))[0];
@@ -307,7 +309,7 @@ const join = async ({ page, data }, step = 0) => {
         }, childJoinBtn);
 
         await page.goto(fbGroupMobile, { waitUntil: "networkidle0" });
-        await page.waitForTimeout(2000)
+        await page.waitForTimeout(5000)
         await page.close();
     } catch (e) {
         await page.close();

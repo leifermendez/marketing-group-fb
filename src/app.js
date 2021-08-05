@@ -7,7 +7,8 @@ puppeteer.use(StealthPlugin())
 const cron = require('node-cron')
 const { consoleMessage } = require('./helpers/console')
 const { puppeterConfig } = require('../config/config')
-const { postGroup } = require('./controllers/login')
+const { postGroup, joinGroup } = require('./controllers/login')
+const { getAll } = require('./controllers/groups')
 const listMessages = require('./controllers/excel')
 const moment = require('moment')
 
@@ -68,6 +69,28 @@ const initMessage = () => {
     })
 }
 
+/** Joined */
+const joinUserGroup = async () => {
+
+    const cluster = await Cluster.launch({
+        concurrency: Cluster.CONCURRENCY_CONTEXT,
+        maxConcurrency: 1,
+        puppeteerOptions: puppeterConfig,
+        retryLimit: 0,
+        timeout: 600000
+    });
+
+    const list = await getAll();
+
+    list.forEach(group => {
+        cluster.queue(group, joinGroup);
+    })
+
+    await cluster.idle();
+    await cluster.close();
+}
+
+
 const cronStart = async () => {
     const now = moment().format('DD/MM/YYYY hh:mm')
     const timezone = process.env.TIMEZONE || "Europe/Madrid"
@@ -111,6 +134,17 @@ const cronStart = async () => {
     cron.schedule(`0 22 * * *`, () => {
         initMessage()
     }, optionsCron);
+
+    consoleMessage(`📆 JOIN Cron every day 11:15 PM ...`, 'greenBright')
+
+    cron.schedule(`15 23 * * *`, () => {
+        joinUserGroup()
+    }, optionsCron);
+}
+
+if (process.env.MODE === 'force') {
+    // initMessage()
+    joinUserGroup()
 }
 
 cronStart()

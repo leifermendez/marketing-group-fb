@@ -38,16 +38,8 @@ const initAll = async () => {
     await cluster.close();
 }
 
-const cronStart = async () => {
 
-    const MINUTE = process.env.MINUTES || 10;
-    consoleMessage(`📆 Cron every ${MINUTE} minutes...`, 'greenBright')
-    cron.schedule(`*/${MINUTE} * * * *`, () => {
-        initAll()
-    });
-}
 initAll()
-// cronStart()
 dbConnect()
 
 
