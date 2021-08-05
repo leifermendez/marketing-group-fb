@@ -1,6 +1,7 @@
 const pathCookieAccount = `${__dirname}/../../tmp`
 const { url, layout } = require('../../config/config')
 const { consoleMessage } = require('../helpers/console')
+const { sendNoty } = require('../helpers/notification')
 const { getAccount } = require('./accounts')
 const { getGroup, saveLog, checkLog } = require('./groups')
 const fs = require('fs')
@@ -169,6 +170,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
             }, textInputMessage);
         } catch (e) {
             await page.close();
+            sendNoty({ title: 'Error', message: `${userFb.email} Falta unirse al grupo ${group.idGroup}`, type: 'error' })
             consoleMessage(`Not joined`, 'red')
         }
 
@@ -239,6 +241,9 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
                 account: userFb.email
             }
         )
+
+        sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
+
         await page.waitForTimeout(6000)
 
         await page.close();
