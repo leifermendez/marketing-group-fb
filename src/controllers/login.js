@@ -277,7 +277,7 @@ const join = async ({ page, data }, step = 0) => {
     try {
         //TODO: Revisar si esta bloqueado
         const layoutBlocked = (userFb.language === 'en')
-            ? '//a[contains(.,"Temporarily Blocked")]' : '//a[contains(.,"Se te bloqueó temporalmente")]';
+            ? '//a[contains(.,"Temporarily Blocked")]' : '//a[contains(.,"Bloqueo temporal")]';
 
         await page.waitForXPath(layoutBlocked)
         const btnBlocked = (await page.$x(layoutBlocked))[0];
