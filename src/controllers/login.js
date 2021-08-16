@@ -124,7 +124,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         const { fbGroupMobile } = group;
         const checkRegister = await checkLog({ idGroup: group.idGroup, message: group.message })
         consoleMessage(`Check GAP Time ${checkRegister}`, 'yellow')
-        if (!checkRegister) return true;
+        if (checkRegister) return true;
 
         await page.goto(fbGroupMobile, { waitUntil: "networkidle0" });
         consoleMessage(`Check blocked`, 'yellow')
@@ -172,7 +172,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         } catch (e) {
             await page.close();
             sendNoty({ title: 'Error', message: `${userFb.email} Falta unirse al grupo ${group.idGroup}`, type: 'error' })
-            errorCatch(e, 'POST_GROUP_NOT_JOINED')
+            errorCatch(e, `POST_GROUP_NOT_JOINED_${group.idGroup}`)
             consoleMessage(`Not joined`, 'red')
         }
 
@@ -236,17 +236,29 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
             el.click();
         }, btnPost);
 
+
+
+        const layoutLinkPost = (userFb.language === 'en') ?
+            '//a[contains(.,"VIEW POST")]' : '//a[contains(.,"VER PUBLICACIÓN")]';
+
+        await page.waitForXPath(layoutLinkPost)
+
+        const linkPost = (await page.$x(layoutLinkPost))[0];
+        const linkHref = await page.evaluate((el) => el.getAttribute('href'), linkPost) || null;
+        console.log(linkHref)
+
+
         await saveLog(
             {
                 idGroup: group.idGroup,
                 message: message.messagesGlobal,
-                account: userFb.email
+                account: userFb.email,
+                linkHref
             }
         )
 
         sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
 
-        await page.waitForTimeout(6000)
 
         await page.close();
 

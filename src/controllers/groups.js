@@ -17,9 +17,9 @@ const getGroup = async (message) => {
                 sort: { lastInteractionAt: 1 }
             }
         )
-
         resDetail.lastInteractionAt = Date.now()
         resDetail.save()
+
         return resDetail
     } catch (e) {
         errorCatch(e)
@@ -30,8 +30,8 @@ const checkLog = async ({ idGroup, message }) => { //138906596809905
     try {
         const now = moment()
         const gapMin = parseInt(process.env.GAP_MINUTES || 5);
-        const checkMessage = await groupLogModel.findOne({ message })
-        if (checkMessage) return false;
+        const checkMessage = await groupLogModel.findOne({ idGroup, message })
+        if (checkMessage) return true;
         const [check] = await groupLogModel.find({ idGroup }, null, { sort: { lastInteractionAt: -1 }, limit: 1 })
         consoleMessage(`Check Log: ${check}`, 'yellow')
         if (!check) return false;
@@ -43,11 +43,12 @@ const checkLog = async ({ idGroup, message }) => { //138906596809905
     }
 }
 
-const saveLog = async ({ idGroup, message, account }) => {
+const saveLog = async ({ idGroup, message, account, linkHref }) => {
     const data = {
         idGroup,
         message,
         account,
+        linkHref,
         lastInteractionAt: Date.now()
     }
     await groupLogModel.create(data)

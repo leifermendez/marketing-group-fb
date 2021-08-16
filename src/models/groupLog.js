@@ -13,6 +13,9 @@ const GroupLogSchma = new mongoose.Schema(
         },
         lastInteractionAt: {
             type: Date
+        },
+        linkHref: {
+            type: String
         }
     },
     {

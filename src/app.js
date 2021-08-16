@@ -54,7 +54,6 @@ const initMessage = () => {
         messages = messages.map(([messagesGlobal, messagesLink, tag, date]) => {
             const today = moment()
             const checkDate = today.diff(moment(date, 'DD/MM/YYYY'), 'hours')
-            console.log(checkDate)
             if (checkDate < 24 && checkDate > 0) {
                 return {
                     messagesGlobal,
@@ -116,6 +115,11 @@ const cronStart = async () => {
         initMessage()
     }, optionsCron);
 
+    consoleMessage(`📆 Cron every day 04:00 PM ...`, 'greenBright')
+
+    cron.schedule(`0 16 * * *`, () => {
+        initMessage()
+    }, optionsCron);
 
     consoleMessage(`📆 Cron every day 06:00 PM ...`, 'greenBright')
 
@@ -149,8 +153,8 @@ const cronStart = async () => {
 }
 
 if (process.env.MODE === 'force') {
-    // initMessage()
-    joinUserGroup()
+    initMessage()
+    // joinUserGroup()
 }
 
 cronStart()
