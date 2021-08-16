@@ -124,7 +124,9 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         const { fbGroupMobile } = group;
         const checkRegister = await checkLog({ idGroup: group.idGroup, message: group.message })
         consoleMessage(`Check GAP Time ${checkRegister}`, 'yellow')
-        if (checkRegister) return true;
+        if (checkRegister) {
+            new Error('CONTENT_DUPLICATE')
+        }
 
         await page.goto(fbGroupMobile, { waitUntil: "networkidle0" });
         consoleMessage(`Check blocked`, 'yellow')

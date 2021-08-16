@@ -32,6 +32,7 @@ const checkLog = async ({ idGroup, message }) => { //138906596809905
         const gapMin = parseInt(process.env.GAP_MINUTES || 5);
         const checkMessage = await groupLogModel.findOne({ idGroup, message })
         if (checkMessage) return true;
+        consoleMessage(`Not post Log: ${checkMessage}`, 'yellow')
         const [check] = await groupLogModel.find({ idGroup }, null, { sort: { lastInteractionAt: -1 }, limit: 1 })
         consoleMessage(`Check Log: ${check}`, 'yellow')
         if (!check) return false;
