@@ -138,17 +138,11 @@ const cronStart = async () => {
     cron.schedule(`0 22 * * *`, () => {
         initMessage()
     }, optionsCron);
-    
+
     consoleMessage(`📆 Cron every day 11:55 PM ...`, 'greenBright')
 
     cron.schedule(`55 23 * * *`, () => {
         initMessage()
-    }, optionsCron);
-
-    consoleMessage(`📆 JOIN Cron every day 11:15 PM ...`, 'greenBright')
-
-    cron.schedule(`15 23 * * *`, () => {
-        joinUserGroup()
     }, optionsCron);
 }
 
