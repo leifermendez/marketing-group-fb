@@ -122,10 +122,10 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         const message = data;
         const group = !groupData ? await getGroup(data) : groupData;
         const { fbGroupMobile } = group;
-        const checkRegister = await checkLog({ idGroup: group.idGroup, message: group.message })
+        const checkRegister = await checkLog({ idGroup: group.idGroup, message: message.messagesGlobal })
         consoleMessage(`Check GAP Time ${checkRegister}`, 'yellow')
         if (checkRegister) {
-            new Error('CONTENT_DUPLICATE')
+            throw new Error('CONTENT_DUPLICATE')
         }
 
         await page.goto(fbGroupMobile, { waitUntil: "networkidle0" });
@@ -235,7 +235,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         await page.waitForXPath(layoutBtnPost)
         const btnPost = (await page.$x(layoutBtnPost))[0];
         await page.evaluate((el) => {
-            el.click();
+            // el.click();
         }, btnPost);
 
 
@@ -247,7 +247,6 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
 
         const linkPost = (await page.$x(layoutLinkPost))[0];
         const linkHref = await page.evaluate((el) => el.getAttribute('href'), linkPost) || null;
-        console.log(linkHref)
 
 
         await saveLog(
