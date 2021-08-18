@@ -38,7 +38,7 @@ const checkLog = async ({ idGroup, message }) => { //138906596809905
         if (!check) return false;
         const lastDate = now.diff(moment(check.lastInteractionAt), 'minutes');
         consoleMessage(`Check GAP Time ${lastDate} >= ${gapMin}`, 'yellow')
-        return (lastDate >= gapMin)
+        return (lastDate < gapMin)
     } catch (e) {
         errorCatch(e)
     }

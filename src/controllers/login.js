@@ -125,6 +125,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         const checkRegister = await checkLog({ idGroup: group.idGroup, message: message.messagesGlobal })
         consoleMessage(`Check GAP Time ${checkRegister}`, 'yellow')
         if (checkRegister) {
+            consoleMessage(`Check log: ${checkRegister} ${group.idGroup} ${message.messagesGlobal} `, 'red')
             throw new Error('CONTENT_DUPLICATE')
         }
 
@@ -173,8 +174,8 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
             }, textInputMessage);
         } catch (e) {
             await page.close();
-            sendNoty({ title: 'Error', message: `${userFb.email} Falta unirse al grupo ${group.idGroup}`, type: 'error' })
-            errorCatch(e, `POST_GROUP_NOT_JOINED_${group.idGroup}`)
+            sendNoty({ title: 'Error', message: `${userFb.email} Falta unirse al grupo ${group.idGroup} `, type: 'error' })
+            errorCatch(e, `POST_GROUP_NOT_JOINED_${group.idGroup} `)
             consoleMessage(`Not joined`, 'red')
         }
 
@@ -235,10 +236,19 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         await page.waitForXPath(layoutBtnPost)
         const btnPost = (await page.$x(layoutBtnPost))[0];
         await page.evaluate((el) => {
-            // el.click();
+            el.click();
         }, btnPost);
 
 
+        //TODO: Check aproved by admin
+        const layoutAproved = (userFb.language === 'en') ?
+            '//div[@data-sigil="marea"]' : '//div[@data-sigil="marea"]';
+
+        await page.waitForXPath(layoutAproved)
+        const alertAproved = (await page.$x(layoutAproved))[0];
+        await page.evaluate(async (el) => {
+            throw new Error('POST_APROVED_BY_DMIN')
+        }, alertAproved);
 
         const layoutLinkPost = (userFb.language === 'en') ?
             '//a[contains(.,"VIEW POST")]' : '//a[contains(.,"VER PUBLICACIÓN")]';
@@ -247,6 +257,8 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
 
         const linkPost = (await page.$x(layoutLinkPost))[0];
         const linkHref = await page.evaluate((el) => el.getAttribute('href'), linkPost) || null;
+
+
 
 
         await saveLog(
@@ -265,6 +277,16 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
 
 
     } catch (e) {
+        if (e === 'POST_APROVED_BY_DMIN') {
+            sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
+            await saveLog(
+                {
+                    idGroup: group.idGroup,
+                    message: message.messagesGlobal,
+                    account: userFb.email
+                }
+            )
+        }
         await page.close();
         console.log('Ocurrio un error!', e);
     }
