@@ -239,17 +239,7 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
             el.click();
         }, btnPost);
 
-
-        //TODO: Check aproved by admin
-        const layoutAproved = (userFb.language === 'en') ?
-            '//div[@data-sigil="marea"]' : '//div[@data-sigil="marea"]';
-
-        await page.waitForXPath(layoutAproved)
-        const alertAproved = (await page.$x(layoutAproved))[0];
-        await page.evaluate(async (el) => {
-            throw new Error('POST_APROVED_BY_DMIN')
-        }, alertAproved);
-
+        //TODO:Get url
         const layoutLinkPost = (userFb.language === 'en') ?
             '//a[contains(.,"VIEW POST")]' : '//a[contains(.,"VER PUBLICACIÓN")]';
 
@@ -258,37 +248,45 @@ const singlePost = async ({ page, data }, prevBlocked = true, groupData = false)
         const linkPost = (await page.$x(layoutLinkPost))[0];
         const linkHref = await page.evaluate((el) => el.getAttribute('href'), linkPost) || null;
 
-
-
-
-        await saveLog(
-            {
-                idGroup: group.idGroup,
-                message: message.messagesGlobal,
-                account: userFb.email,
-                linkHref
-            }
-        )
-
-        sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
-
-
-        await page.close();
-
-
-    } catch (e) {
-        if (e === 'POST_APROVED_BY_DMIN') {
-            sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
+        if (linkHref) {
             await saveLog(
                 {
                     idGroup: group.idGroup,
                     message: message.messagesGlobal,
-                    account: userFb.email
+                    account: userFb.email,
+                    linkHref
                 }
             )
+
+            sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
+
+            await page.close();
         }
-        await page.close();
+
+
+        //TODO: Check aproved by admin
+        const layoutAproved = (userFb.language === 'en') ?
+            '//span[contains(.,"Your post has been submitted and is pending approval by an admin or moderator.")]' : '//span[contains(.,"Tu publicación se ha enviado y requiere la aprobación de un administrador o moderador.")]';
+
+        await page.waitForXPath(layoutAproved)
+        const alertAproved = (await page.$x(layoutAproved))[0];
+        await page.evaluate(async (el) => {
+            throw new Error('POST_APROVED_BY_DMIN') //Your post has been submitted and is pending approval by an admin or moderator.
+        }, alertAproved);
+
+
+    } catch (e) {
         console.log('Ocurrio un error!', e);
+        sendNoty({ title: 'Publicación', message: `${userFb.email} publico ${group.idGroup}`, type: 'success' })
+        await saveLog(
+            {
+                idGroup: group.idGroup,
+                message: message.messagesGlobal,
+                account: userFb.email
+            }
+        )
+        await page.close();
+
     }
 }
 
